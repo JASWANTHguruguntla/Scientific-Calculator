@@ -42,7 +42,9 @@ function App() {
     { label: 'asin', val: 'asin' }, { label: 'acos', val: 'acos' }, { label: 'atan', val: 'atan' },
     { label: 'ln', val: 'ln' }, { label: 'log', val: 'log' }, { label: 'e', val: 'e' },
     { label: 'π', val: 'π' }, { label: '√', val: 'sqrt' }, { label: 'n!', val: '!' },
-    { label: 'x²', val: '^2' }, { label: 'x³', val: '^3' }, { label: 'xʸ', val: '^' },
+    { label: 'x²', val: '^2', className: 'text-purple-600 dark:text-purple-400 font-serif italic' }, 
+    { label: 'x³', val: '^3', className: 'text-purple-600 dark:text-purple-400 font-serif italic' }, 
+    { label: 'xʸ', val: '^', className: 'text-purple-600 dark:text-purple-400 font-serif italic' },
     { label: '(', val: '(' }, { label: ')', val: ')' }, { label: '|x|', val: 'abs(' },
     { label: 'mod', val: '%' }, { label: 'x', val: 'x' },
   ];
@@ -123,7 +125,8 @@ function App() {
                  key={k.label} 
                  variant="scientific" 
                  label={k.label} 
-                 onClick={() => actions.append(k.val)} 
+                 onClick={() => actions.append(k.val)}
+                 className={k.className}
                />
              ))}
              {/* Memory Controls */}

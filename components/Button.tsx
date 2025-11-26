@@ -5,13 +5,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label: React.ReactNode;
 }
 
-const Button: React.FC<ButtonProps> = ({ variant = 'default', label, className = '', ...props }) => {
+const Button: React.FC<ButtonProps> = ({ variant = 'default', label, className = '', onClick, ...props }) => {
   // Base styles:
-  // - active:duration-75 makes the "down" press feel snappy/responsive
-  // - duration-200 makes the "up" release/hover feel smooth
+  // - active:duration-0 makes the "down" press feel instant (zero latency visual)
   // - active:scale-95 provides physical feedback
-  // - transform-gpu ensures smooth composition
-  const baseStyles = "relative w-full h-14 sm:h-16 rounded-2xl font-medium text-lg sm:text-xl transition-all duration-200 active:duration-75 flex items-center justify-center select-none outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 dark:focus:ring-offset-gray-900 active:scale-95 transform-gpu disabled:opacity-50 disabled:cursor-not-allowed";
+  // - touch-manipulation prevents browser zoom delays
+  const baseStyles = "relative w-full h-14 sm:h-16 rounded-2xl font-medium text-lg sm:text-xl transition-all duration-200 active:duration-0 flex items-center justify-center select-none outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 dark:focus:ring-offset-gray-900 active:scale-95 transform-gpu disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation";
   
   const variants = {
     // Standard Number Buttons
@@ -115,9 +114,32 @@ const Button: React.FC<ButtonProps> = ({ variant = 'default', label, className =
   // Helper to merge class strings cleanly
   const variantClasses = variants[variant].replace(/\s+/g, ' ').trim();
 
+  const triggerFeedback = () => {
+    // Haptic feedback for supported devices
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(15);
+    }
+  };
+
   return (
     <button 
       className={`${baseStyles} ${variantClasses} ${className}`}
+      onPointerDown={(e) => {
+        // Reduced Latency: Execute logic on pointer down (touch/mouse press)
+        // rather than waiting for release (click).
+        triggerFeedback();
+        onClick?.(e as any);
+      }}
+      onClick={(e) => {
+        // Accessibility: Allow keyboard interactions (Enter/Space triggers click with detail === 0)
+        // But prevent double-firing from mouse/touch interactions which are handled by onPointerDown
+        if (e.detail === 0) {
+          triggerFeedback();
+          onClick?.(e as any);
+        } else {
+          e.preventDefault();
+        }
+      }}
       {...props}
     >
       {label}
