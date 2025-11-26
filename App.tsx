@@ -41,13 +41,11 @@ function App() {
     { label: 'sin', val: 'sin' }, { label: 'cos', val: 'cos' }, { label: 'tan', val: 'tan' },
     { label: 'asin', val: 'asin' }, { label: 'acos', val: 'acos' }, { label: 'atan', val: 'atan' },
     { label: 'ln', val: 'ln' }, { label: 'log', val: 'log' }, { label: 'e', val: 'e' },
-    { label: 'π', val: 'π' }, { label: 'x²', val: '^2' }, { label: '√', val: 'sqrt' },
-    { label: '(', val: '(' }, { label: ')', val: ')' }, { label: 'n!', val: '!' },
-    { label: '|x|', val: 'abs(' }, { label: 'mod', val: '%' }, { label: 'x', val: 'x' }, // Replaced e^x with x for graph, or add new row
+    { label: 'π', val: 'π' }, { label: '√', val: 'sqrt' }, { label: 'n!', val: '!' },
+    { label: 'x²', val: '^2' }, { label: 'x³', val: '^3' }, { label: 'xʸ', val: '^' },
+    { label: '(', val: '(' }, { label: ')', val: ')' }, { label: '|x|', val: 'abs(' },
+    { label: 'mod', val: '%' }, { label: 'x', val: 'x' },
   ];
-  // Note: The previous layout had 'e^x'. 'x' is crucial for graphing.
-  // I replaced e^x with x, but e^x is useful. Let's try to fit both or replace a less used one?
-  // Actually, 'x' is now essential. I'll put x in the grid.
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4 transition-colors duration-200">
