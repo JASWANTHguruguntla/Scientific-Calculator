@@ -80,14 +80,14 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ isOpen, onClose }) => {
                             type="number" 
                             value={value}
                             onChange={(e) => setValue(e.target.value)}
-                            className="flex-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-white dark:bg-gray-800 border border-transparent focus:border-blue-500 rounded-xl p-3 text-2xl font-mono text-gray-900 dark:text-white outline-none transition-all placeholder-gray-300 dark:placeholder-gray-700 h-16"
+                            className="flex-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:border-blue-500 rounded-xl px-4 text-2xl font-mono text-gray-900 dark:text-white outline-none transition-all placeholder-gray-300 dark:placeholder-gray-700 h-16"
                             placeholder="0"
                         />
                         <div className="relative w-1/3 min-w-[120px] h-16">
                             <select 
                                 value={fromUnit}
                                 onChange={(e) => setFromUnit(e.target.value)}
-                                className="w-full h-full appearance-none bg-blue-50 dark:bg-gray-800 border border-blue-100 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-2 pr-8 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
+                                className="w-full h-full appearance-none bg-blue-50 dark:bg-gray-800 border-2 border-blue-100 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 pr-8 font-medium focus:border-blue-500 focus:outline-none cursor-pointer transition-colors"
                             >
                                 {CATEGORIES[category].map(u => <option key={u} value={u}>{u}</option>)}
                             </select>
@@ -109,14 +109,14 @@ const UnitConverter: React.FC<UnitConverterProps> = ({ isOpen, onClose }) => {
                 <div className="bg-blue-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-blue-100 dark:border-gray-800 shadow-sm">
                     <label className="text-xs font-bold text-blue-400 dark:text-blue-400 uppercase tracking-wider mb-2 block">To</label>
                     <div className="flex space-x-4 items-center">
-                        <div className="flex-1 bg-white/50 dark:bg-gray-800 border border-blue-100 dark:border-transparent rounded-xl p-3 text-2xl font-mono font-bold text-blue-600 dark:text-blue-300 overflow-x-auto h-16 flex items-center">
+                        <div className="flex-1 bg-white/50 dark:bg-gray-800 border-2 border-blue-100 dark:border-transparent rounded-xl px-4 text-2xl font-mono font-bold text-blue-600 dark:text-blue-300 overflow-x-auto h-16 flex items-center">
                             {result}
                         </div>
                         <div className="relative w-1/3 min-w-[120px] h-16">
                             <select 
                                 value={toUnit}
                                 onChange={(e) => setToUnit(e.target.value)}
-                                className="w-full h-full appearance-none bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-2 pr-8 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
+                                className="w-full h-full appearance-none bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-xl px-4 pr-8 font-medium focus:border-blue-500 focus:outline-none cursor-pointer transition-colors"
                             >
                                 {CATEGORIES[category].map(u => <option key={u} value={u}>{u}</option>)}
                             </select>
