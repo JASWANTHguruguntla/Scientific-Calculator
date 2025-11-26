@@ -18,10 +18,13 @@ export interface CalculatorState {
   memory: number;
   mode: CalculatorMode;
   theme: ThemeMode;
-  isScientificOpen: boolean; // For mobile toggle
+  isScientificOpen: boolean; 
   isGraphOpen: boolean;
+  isUnitConverterOpen: boolean;
+  isAiThinking: boolean;
   lastCalculated: boolean;
   error: string | null;
+  aiExplanation: string | null;
 }
 
 export type ButtonConfig = {
@@ -32,3 +35,5 @@ export type ButtonConfig = {
   memoryAction?: 'MC' | 'MR' | 'MS' | 'M+';
   className?: string;
 };
+
+export type UnitCategory = 'length' | 'mass' | 'temperature' | 'volume' | 'digital';

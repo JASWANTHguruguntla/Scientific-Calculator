@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, History as HistoryIcon, Calculator as CalculatorIcon, LineChart, Moon, Sun } from 'lucide-react';
+import { Menu, History as HistoryIcon, Calculator as CalculatorIcon, LineChart, Moon, Sun, ArrowRightLeft, Sparkles, Loader2, X } from 'lucide-react';
 import { useCalculator } from './hooks/useCalculator';
 import Display from './components/Display';
 import Button from './components/Button';
 import History from './components/History';
 import Graph from './components/Graph';
+import UnitConverter from './components/UnitConverter';
+import ReactMarkdown from 'react-markdown';
 
 function App() {
-  const { state, actions } = useCalculator();
+  const { state, isListening, actions } = useCalculator();
   const [showHistory, setShowHistory] = useState(false);
 
   // Keyboard support
@@ -55,7 +57,7 @@ function App() {
       {/* Main Container */}
       <div className="relative w-full max-w-5xl bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 flex flex-col md:flex-row h-[90vh] md:h-auto transition-colors duration-200">
         
-        {/* History Sidebar Overlay */}
+        {/* Overlays */}
         <History 
           history={state.history} 
           isOpen={showHistory} 
@@ -64,7 +66,6 @@ function App() {
           onSelect={(expr) => actions.append(expr)} 
         />
 
-        {/* Graph Overlay */}
         <Graph 
           expression={state.expression} 
           isOpen={state.isGraphOpen} 
@@ -73,13 +74,43 @@ function App() {
           theme={state.theme}
         />
 
+        <UnitConverter 
+            isOpen={state.isUnitConverterOpen}
+            onClose={actions.toggleUnitConverter}
+        />
+
+        {/* AI Explanation Overlay */}
+        {state.aiExplanation && (
+            <div className="absolute inset-0 bg-white/95 dark:bg-gray-900/95 z-50 flex flex-col p-6 overflow-y-auto animate-fade-in">
+                <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold flex items-center text-blue-600 dark:text-blue-400">
+                        <Sparkles className="mr-2" size={24} /> AI Explanation
+                    </h3>
+                    <button onClick={actions.closeAi} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                        <X size={28} className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" />
+                    </button>
+                </div>
+                <div className="prose prose-blue dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 leading-relaxed">
+                    <ReactMarkdown>{state.aiExplanation}</ReactMarkdown>
+                </div>
+                <div className="mt-8 flex justify-center">
+                    <button 
+                        onClick={actions.closeAi}
+                        className="px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:bg-blue-700 hover:-translate-y-0.5 transition-all"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        )}
+
         {/* Header / Top Bar (Mobile) */}
         <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-gray-900 z-10 border-b border-gray-100 dark:border-gray-800">
           <div className="flex space-x-2">
-            <button onClick={() => setShowHistory(true)} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+            <button onClick={() => setShowHistory(true)} className="text-gray-500 dark:text-gray-400">
               <HistoryIcon />
             </button>
-             <button onClick={actions.toggleTheme} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+             <button onClick={actions.toggleTheme} className="text-gray-500 dark:text-gray-400">
                {state.theme === 'dark' ? <Sun size={20}/> : <Moon size={20} />}
              </button>
           </div>
@@ -96,10 +127,13 @@ function App() {
           </div>
           
           <div className="flex space-x-2">
-            <button onClick={actions.toggleGraph} className={`text-gray-500 dark:text-gray-400 hover:text-blue-500 ${state.isGraphOpen ? 'text-blue-500' : ''}`}>
+            <button onClick={actions.toggleUnitConverter} className="text-gray-500 dark:text-gray-400">
+                <ArrowRightLeft size={22} />
+            </button>
+            <button onClick={actions.toggleGraph} className={`text-gray-500 dark:text-gray-400 ${state.isGraphOpen ? 'text-blue-500' : ''}`}>
                <LineChart />
             </button>
-            <button onClick={actions.toggleScientific} className={`text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white ${state.isScientificOpen ? 'text-blue-500' : ''}`}>
+            <button onClick={actions.toggleScientific} className={`text-gray-500 dark:text-gray-400 ${state.isScientificOpen ? 'text-blue-500' : ''}`}>
                <CalculatorIcon />
             </button>
           </div>
@@ -135,6 +169,26 @@ function App() {
              <Button variant="scientific" label="M+" onClick={() => actions.handleMemory('M+')} />
           </div>
           
+          {/* AI Feature Block (Optional in Scientific Tab now that it is in Display) */}
+          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+             <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 flex items-center">
+                    <Sparkles size={14} className="mr-1" /> AI Helper
+                </span>
+                {state.isAiThinking && <Loader2 size={16} className="animate-spin text-blue-500" />}
+             </div>
+             <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+                 Need help? Ask AI to explain the calculation step-by-step.
+             </p>
+             <button 
+                onClick={actions.requestAiExplanation}
+                disabled={state.isAiThinking || (!state.expression && !state.result)}
+                className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 flex items-center justify-center"
+             >
+                 {state.isAiThinking ? 'Thinking...' : 'Explain Result'}
+             </button>
+          </div>
+
           <div className="mt-auto pt-6 hidden md:block">
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm">
               <div className="text-gray-400 dark:text-gray-500 text-xs mb-1">MEMORY</div>
@@ -164,6 +218,13 @@ function App() {
                    <LineChart size={18} />
                    <span className="text-sm font-medium">Graph</span>
                  </button>
+                 <button 
+                   onClick={actions.toggleUnitConverter}
+                   className={`flex items-center space-x-2 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 ${state.isUnitConverterOpen ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                 >
+                   <ArrowRightLeft size={18} />
+                   <span className="text-sm font-medium">Converter</span>
+                 </button>
              </div>
 
              <div className="flex items-center space-x-4">
@@ -173,7 +234,7 @@ function App() {
                 >
                     {state.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} className="text-gray-600"/>}
                 </button>
-                <div className="text-gray-400 text-xs">SciCalc Pro v1.1</div>
+                <div className="text-gray-400 text-xs">SciCalc Pro v2.0</div>
              </div>
           </div>
 
@@ -182,6 +243,10 @@ function App() {
             result={state.result} 
             error={state.error}
             mode={state.mode}
+            onVoiceInput={actions.handleVoiceInput}
+            onAiRequest={actions.requestAiExplanation}
+            isListening={isListening}
+            isAiThinking={state.isAiThinking}
           />
 
           {/* Standard Keypad Grid */}

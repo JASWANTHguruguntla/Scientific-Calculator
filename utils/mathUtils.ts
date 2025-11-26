@@ -47,6 +47,7 @@ const createScope = (mode: CalculatorMode, memory: number, extraScope: Record<st
 };
 
 const sanitizeExpression = (expression: string): string => {
+  if (!expression) return '';
   return expression
     .replace(/×/g, '*')
     .replace(/÷/g, '/')
@@ -62,11 +63,6 @@ export const evaluateExpression = (expression: string, mode: CalculatorMode, mem
     if (!expression.trim()) return '';
 
     const sanitisedExpr = sanitizeExpression(expression);
-
-    // If expression contains 'x' and we are evaluating for a result, it should fail 
-    // unless we interpret it as 0 or something, but standard calc throws error for vars.
-    // We let mathjs throw if x is undefined.
-
     const scope = createScope(mode, memory);
     const result = math.evaluate(sanitisedExpr, scope);
 
@@ -76,10 +72,20 @@ export const evaluateExpression = (expression: string, mode: CalculatorMode, mem
     return String(formatted).replace(/"/g, '');
 
   } catch (err: any) {
-    // If error is about undefined symbol 'x', we might want to tell user to use Graph mode
     console.error("Calculation Error", err);
     throw new Error(err.message || "Error");
   }
+};
+
+export const expressionToTex = (expression: string): string => {
+    try {
+        if (!expression) return '';
+        const sanitized = sanitizeExpression(expression);
+        const node = math.parse(sanitized);
+        return node.toTex({ parenthesis: 'keep' });
+    } catch (e) {
+        return '';
+    }
 };
 
 export const formatNumber = (num: string): string => {
@@ -89,39 +95,13 @@ export const formatNumber = (num: string): string => {
   return num;
 };
 
-export interface GraphData {
-  labels: number[];
-  data: number[];
-}
-
-export const generateGraphData = (expression: string, mode: CalculatorMode): GraphData => {
-  const labels: number[] = [];
-  const data: number[] = [];
-  const range = 10;
-  const step = 0.5;
-
-  const sanitisedExpr = sanitizeExpression(expression);
-  const compiled = math.compile(sanitisedExpr);
-
-  for (let x = -range; x <= range; x += step) {
+// Unit Conversion
+export const convertUnit = (value: number, fromUnit: string, toUnit: string): number => {
     try {
-      // Round x to avoid floating point ugliness in labels
-      const roundedX = Math.round(x * 10) / 10;
-      const scope = createScope(mode, 0, { x: roundedX });
-      const y = compiled.evaluate(scope);
-      
-      if (typeof y === 'number' && isFinite(y)) {
-        labels.push(roundedX);
-        data.push(y);
-      } else {
-        // Handle undefined or complex results by skipping or pushing null
-        labels.push(roundedX);
-        data.push(NaN); // Chart.js handles NaN as a gap
-      }
+        const result = math.evaluate(`${value} ${fromUnit} to ${toUnit}`);
+        return result.toNumber(toUnit);
     } catch (e) {
-      // Skip points that error
+        console.error(e);
+        return 0;
     }
-  }
-
-  return { labels, data };
-};
+}
