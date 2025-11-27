@@ -1,11 +1,20 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Initialize Gemini Client
-// Note: API Key must be in process.env.API_KEY
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy initialization to prevent app crash if key is missing on load
+const getAiClient = () => {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        console.warn("API Key is missing. AI features will be disabled.");
+        return null;
+    }
+    return new GoogleGenAI({ apiKey });
+};
 
 export const explainMath = async (expression: string, result: string): Promise<string> => {
   try {
+    const ai = getAiClient();
+    if (!ai) return "AI API Key is missing. Please configure it in your deployment settings.";
+
     const prompt = `
       You are a helpful math tutor. Explain this calculation in a very simple, easy-to-understand way, suitable for a beginner or a young student.
       
@@ -19,8 +28,9 @@ export const explainMath = async (expression: string, result: string): Promise<s
       4. Use Markdown formatting.
     `;
     
+    // Using gemini-3-pro-preview for complex text tasks (STEM/Math)
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
     });
 
@@ -33,6 +43,9 @@ export const explainMath = async (expression: string, result: string): Promise<s
 
 export const parseNaturalLanguage = async (query: string): Promise<string> => {
   try {
+    const ai = getAiClient();
+    if (!ai) throw new Error("API Key missing");
+
     const prompt = `Convert this natural language math request into a single mathematical expression that can be evaluated by a standard calculator (using mathjs syntax). 
     Return ONLY the expression. Do not add any text.
     Examples:
@@ -40,8 +53,9 @@ export const parseNaturalLanguage = async (query: string): Promise<string> => {
     Input: "area of circle radius 5" -> Output: "pi * 5^2"
     Input: "${query}" -> Output:`;
 
+    // Using gemini-3-pro-preview for complex text tasks (STEM/Math)
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-pro-preview',
         contents: prompt,
     });
     
