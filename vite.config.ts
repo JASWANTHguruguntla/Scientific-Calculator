@@ -12,7 +12,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       // Prevents "process is not defined" error and injects the Key
-      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      // Defaults to empty string if undefined to prevent SDK crash
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || ""),
     }
   };
 });

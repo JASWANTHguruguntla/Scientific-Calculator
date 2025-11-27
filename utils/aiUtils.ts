@@ -2,12 +2,18 @@ import { GoogleGenAI } from "@google/genai";
 
 // Lazy initialization to prevent app crash if key is missing on load
 const getAiClient = () => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-        console.warn("API Key is missing. AI features will be disabled.");
+    try {
+        // Ensure key is a string and trimmed
+        const apiKey = (process.env.API_KEY || "").trim();
+        if (!apiKey) {
+            console.warn("API Key is missing or empty. AI features will be disabled.");
+            return null;
+        }
+        return new GoogleGenAI({ apiKey });
+    } catch (error) {
+        console.error("Failed to initialize Google GenAI Client:", error);
         return null;
     }
-    return new GoogleGenAI({ apiKey });
 };
 
 export const explainMath = async (expression: string, result: string): Promise<string> => {
